@@ -12,6 +12,10 @@ def convert_pptx_to_html_slides(pptx_path, output_dir):
     options = slides.export.HtmlOptions()
     options.html_formatter = slides.export.HtmlFormatter.create_document_formatter("", False)
 
+    import re
+    # Regex to match the <text> element containing the Aspose watermark
+    watermark_pattern = re.compile(r'<text[^>]*>(?:(?!</text>).)*?Evaluation only(?:(?!</text>).)*?</text>', re.DOTALL)
+
     for i, slide in enumerate(presentation.slides):
         slide_num = i + 1
         output_file = os.path.join(output_dir, f"slide_{slide_num}.html")
@@ -19,7 +23,16 @@ def convert_pptx_to_html_slides(pptx_path, output_dir):
 
         presentation.save(output_file, [slide_num], slides.export.SaveFormat.HTML, options)
 
-    print("All slides converted successfully!")
+        # Post-processing: remove the watermark from the generated HTML
+        with open(output_file, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+
+        cleaned_content = watermark_pattern.sub('', html_content)
+
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(cleaned_content)
+
+    print("All slides converted and cleaned successfully!")
 
 if __name__ == "__main__":
     pptx_file = "StratoScout Public Sector Pitch Deck.pptx"
