@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .slide-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            /* Using padding-top for 16:9 aspect ratio */
+            padding-top: 56.25%;
+            overflow: hidden;
+            border: 1px solid red;
+        }
+        .slide-iframe-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .slide-iframe {
+            width: 1280px;
+            height: 720px;
+            border: none;
+            transform-origin: top left;
+            /* To make it responsive, we can use container queries or vw, but since it's in a wrapper, it's tricky in pure CSS without knowing wrapper width.
+               Wait, we can use scale() with a calc if we know the width, but wrapper width varies.
+            */
+        }
+    </style>
+    <script>
+        function resizeIframes() {
+            document.querySelectorAll('.slide-wrapper').forEach(wrapper => {
+                const iframe = wrapper.querySelector('.slide-iframe');
+                const scale = wrapper.clientWidth / 1280;
+                iframe.style.transform = `scale(${scale})`;
+            });
+        }
+        window.addEventListener('resize', resizeIframes);
+        window.addEventListener('DOMContentLoaded', resizeIframes);
+    </script>
+</head>
+<body>
+    <div class="slide-wrapper">
+        <div class="slide-iframe-container">
+            <iframe src="slides_html/slide_3.html" class="slide-iframe" scrolling="no"></iframe>
+        </div>
+    </div>
+</body>
+</html>
