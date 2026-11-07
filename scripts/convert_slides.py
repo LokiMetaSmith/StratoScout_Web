@@ -1,7 +1,21 @@
 import aspose.slides as slides
 import os
+import argparse
+import sys
+import re
+
+# Regex to match the <text> element containing the Aspose watermark
+WATERMARK_PATTERN = re.compile(r'<text[^>]*>(?:(?!</text>).)*?Evaluation only(?:(?!</text>).)*?</text>', re.DOTALL)
+
+def remove_watermark(html_content: str) -> str:
+    """Removes the Aspose 'Evaluation only' watermark from the given HTML content."""
+    return WATERMARK_PATTERN.sub('', html_content)
 
 def convert_pptx_to_html_slides(pptx_path, output_dir):
+    if not os.path.exists(pptx_path):
+        print(f"Error: The input file '{pptx_path}' does not exist.", file=sys.stderr)
+        sys.exit(1)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -11,10 +25,6 @@ def convert_pptx_to_html_slides(pptx_path, output_dir):
     # Use HTML options
     options = slides.export.HtmlOptions()
     options.html_formatter = slides.export.HtmlFormatter.create_document_formatter("", False)
-
-    import re
-    # Regex to match the <text> element containing the Aspose watermark
-    watermark_pattern = re.compile(r'<text[^>]*>(?:(?!</text>).)*?Evaluation only(?:(?!</text>).)*?</text>', re.DOTALL)
 
     for i, slide in enumerate(presentation.slides):
         slide_num = i + 1
@@ -27,14 +37,21 @@ def convert_pptx_to_html_slides(pptx_path, output_dir):
         with open(output_file, 'r', encoding='utf-8') as f:
             html_content = f.read()
 
-        cleaned_content = watermark_pattern.sub('', html_content)
+        cleaned_content = remove_watermark(html_content)
 
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(cleaned_content)
 
     print("All slides converted and cleaned successfully!")
 
+def main():
+    parser = argparse.ArgumentParser(description="Convert PPTX to HTML slides and remove Aspose watermark.")
+    parser.add_argument("--input", default="StratoScout Public Sector Pitch Deck.pptx", help="Path to the input PPTX file.")
+    parser.add_argument("--output", default="slides_html", help="Directory to save the output HTML slides.")
+
+    args = parser.parse_args()
+
+    convert_pptx_to_html_slides(args.input, args.output)
+
 if __name__ == "__main__":
-    pptx_file = "StratoScout Public Sector Pitch Deck.pptx"
-    output_directory = "slides_html"
-    convert_pptx_to_html_slides(pptx_file, output_directory)
+    main()
