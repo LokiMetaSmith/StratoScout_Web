@@ -12,7 +12,6 @@ def test_remove_watermark_basic():
     expected = '''
     <div>
         <text>Some valid text</text>
-
         <text>More valid text</text>
     </div>
     '''
@@ -37,9 +36,7 @@ def test_remove_watermark_multiple_watermarks():
     '''
     expected = '''
     <div>
-
         <text>Valid text</text>
-
     </div>
     '''
     assert remove_watermark(html_content) == expected
@@ -52,6 +49,21 @@ def test_remove_watermark_multiline():
     </text>
     '''
     expected = '''
-
     '''
     assert remove_watermark(html_content) == expected
+
+def test_remove_watermark_custom_text():
+    html_content = '''
+    <div>
+        <text>Some valid text</text>
+        <text style="color:blue;">Custom Watermark Text to Remove</text>
+        <text>More valid text</text>
+    </div>
+    '''
+    expected = '''
+    <div>
+        <text>Some valid text</text>
+        <text>More valid text</text>
+    </div>
+    '''
+    assert remove_watermark(html_content, watermark_text="Custom Watermark Text") == expected
